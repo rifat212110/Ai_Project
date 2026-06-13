@@ -188,3 +188,55 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 print(f"Training set size: {X_train.shape[0]}")
 print(f"Test set size: {X_test.shape[0]}")
+
+# ---------------------- Enhanced Model with Ensemble ----------------------
+
+# Define individual models
+svm_model = LinearSVC(C=1.0, random_state=42, max_iter=2000)
+lr_model = LogisticRegression(C=1.0, random_state=42, max_iter=1000)
+rf_model = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
+nb_model = MultinomialNB(alpha=0.1)  # Now works with scaled features
+
+# Create ensemble model
+ensemble_model = VotingClassifier(
+    estimators=[
+        ('svm', svm_model),
+        ('lr', lr_model),
+        ('rf', rf_model),
+        ('nb', nb_model)
+    ],
+    voting='hard'  # Use hard voting for binary classification
+)
+
+# Train the ensemble model
+print("Training ensemble model...")
+ensemble_model.fit(X_train, y_train)
+
+# Evaluate ensemble model
+y_pred_ensemble = ensemble_model.predict(X_test)
+ensemble_accuracy = accuracy_score(y_test, y_pred_ensemble)
+
+print(f"\nEnsemble Model Accuracy: {ensemble_accuracy * 100:.2f}%")
+print("\nEnsemble Classification Report:")
+print(classification_report(y_test, y_pred_ensemble, target_names=['Not Cyberbullying', 'Cyberbullying']))
+
+# Also train individual models for comparison
+individual_accuracies = {}
+models = {'SVM': svm_model, 'Logistic Regression': lr_model, 
+          'Random Forest': rf_model, 'Naive Bayes': nb_model}
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    individual_accuracies[name] = acc
+    print(f"{name} Accuracy: {acc * 100:.2f}%")
+
+# Use the best performing model (ensemble or individual)
+best_model = ensemble_model
+best_accuracy = ensemble_accuracy
+
+# Cross-validation for more robust evaluation
+cv_scores = cross_val_score(ensemble_model, X_train, y_train, cv=5, scoring='accuracy')
+print(f"\nCross-validation scores: {cv_scores}")
+print(f"Average CV accuracy: {cv_scores.mean() * 100:.2f}% (+/- {cv_scores.std() * 2 * 100:.2f}%)")
