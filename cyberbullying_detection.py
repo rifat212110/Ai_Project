@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import messagebox, ttk
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
@@ -240,3 +242,266 @@ best_accuracy = ensemble_accuracy
 cv_scores = cross_val_score(ensemble_model, X_train, y_train, cv=5, scoring='accuracy')
 print(f"\nCross-validation scores: {cv_scores}")
 print(f"Average CV accuracy: {cv_scores.mean() * 100:.2f}% (+/- {cv_scores.std() * 2 * 100:.2f}%)")
+
+# ---------------------- Enhanced GUI Functions ----------------------
+
+def animate_scan():
+    """Animate the scanning process"""
+    dots = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+    for i in range(20):  # 2 seconds animation
+        if analyzing:
+            check_button.config(text=f"{dots[i % len(dots)]} Analyzing...")
+            root.update()
+            time.sleep(0.1)
+
+def detect_cyberbullying():
+    global analyzing
+    user_input = text_entry.get("1.0", tk.END).strip()
+    if not user_input or user_input == PLACEHOLDER_TEXT:
+        messagebox.showwarning("Input Required", "Please enter some text to analyze.")
+        return
+    
+    # Show loading state
+    analyzing = True
+    
+    # Start animation in a separate thread
+    animation_thread = threading.Thread(target=animate_scan)
+    animation_thread.start()
+    
+    try:
+        # Simulate processing time for better UX
+        time.sleep(1)
+        
+        # Preprocess text
+        cleaned = preprocess(user_input)
+        if not cleaned:
+            messagebox.showwarning("Invalid Input", "Input contains no meaningful content after preprocessing.")
+            return
+        
+        # Extract features
+        text_features = extract_features(user_input)
+        
+        # Transform text with TF-IDF
+        vect_text = tfidf_vectorizer.transform([cleaned])
+        
+        # Scale additional features
+        additional_features = np.array([[text_features[col] for col in feature_columns]])
+        additional_features_scaled = scaler.transform(additional_features)
+        
+        # Combine with TF-IDF features
+        additional_features_sparse = csr_matrix(additional_features_scaled)
+        combined_features = hstack([vect_text, additional_features_sparse])
+        
+        # Make prediction
+        prediction = best_model.predict(combined_features)[0]
+        
+        # Get prediction probabilities (if available)
+        try:
+            if hasattr(best_model, 'predict_proba'):
+                probabilities = best_model.predict_proba(combined_features)[0]
+                confidence = max(probabilities)
+            elif hasattr(best_model, 'decision_function'):
+                decision_score = best_model.decision_function(combined_features)[0]
+                confidence = abs(decision_score)
+            else:
+                confidence = 0.8  # Default confidence
+        except:
+            confidence = 0.8
+        
+        # Update result display
+        if prediction == 0:  # Not cyberbullying
+            result_text = "✅ Text Appears Safe"
+            result_color = "#27ae60"  # Green
+            bg_color = "#e8fff8"
+            icon = "🌟"
+            advice_text = "Great! Your text promotes positive communication and appears to be respectful."
+            suggestions = get_positive_suggestions()
+        else:  # Cyberbullying detected
+            result_text = "⚠️ Potential Harmful Content"
+            result_color = "#e74c3c"  # Red
+            bg_color = "#fff5f5"
+            icon = "🚨"
+            advice_text = "The text may contain harmful language. Consider revising to promote kindness."
+            suggestions = get_improvement_suggestions()
+        
+        # Animate result appearance
+        show_result_with_animation(result_text, result_color, bg_color, icon, advice_text, confidence, text_features, suggestions)
+        
+    except Exception as e:
+        messagebox.showerror("Analysis Error", f"An error occurred during analysis: {str(e)}")
+    
+    finally:
+        analyzing = False
+        check_button.config(text="🔍 Analyze Text", state="normal")
+
+def show_result_with_animation(result_text, result_color, bg_color, icon, advice_text, confidence, text_features, suggestions):
+    """Show result with smooth animation"""
+    result_frame.config(bg=bg_color)
+    
+    # Icon animation
+    icon_label.config(text=icon, fg=result_color, bg=bg_color, font=("Segoe UI", 48))
+    
+    # Result text
+    result_label.config(text=result_text, fg=result_color, bg=bg_color)
+    
+    # Confidence with color coding
+    conf_color = "#27ae60" if confidence > 0.7 else "#f39c12" if confidence > 0.5 else "#e74c3c"
+    confidence_text = f"Confidence: {confidence:.1%}"
+    confidence_label.config(text=confidence_text, bg=bg_color, fg=conf_color)
+    
+    # Advice
+    advice_label.config(text=advice_text, bg=bg_color)
+    
+    # Analysis details with emojis
+    analysis_text = f"📝 Words: {text_features['word_count']} | "
+    analysis_text += f"😊 Sentiment: {text_features['sentiment_compound']:.2f} | "
+    analysis_text += f"📢 Caps: {text_features['caps_ratio']:.1%}"
+    analysis_label.config(text=analysis_text, bg=bg_color)
+    
+    # Suggestions
+    suggestions_text.config(state='normal')
+    suggestions_text.delete(1.0, tk.END)
+    suggestions_text.insert(tk.END, suggestions)
+    suggestions_text.config(state='disabled', bg=bg_color)
+    
+    # Show result frame with fade-in effect
+    result_frame.pack(pady=20, padx=20, fill="x")
+    
+    # Pulse effect for icon
+    animate_icon_pulse(icon_label, result_color)
+
+def animate_icon_pulse(widget, color):
+    """Create a pulse effect for the icon"""
+    def pulse():
+        for size in [48, 52, 48]:
+            widget.config(font=("Segoe UI", size))
+            root.update()
+            time.sleep(0.1)
+    
+    pulse_thread = threading.Thread(target=pulse)
+    pulse_thread.start()
+
+def get_positive_suggestions():
+    suggestions = [
+        "🌟 Your text promotes positive communication!",
+        "💡 Keep using respectful language like this",
+        "🎯 Consider adding encouraging words to make it even better",
+        "✨ Your message creates a safe space for others"
+    ]
+    return "\n".join(suggestions)
+
+def get_improvement_suggestions():
+    suggestions = [
+        "🤝 Try rephrasing with kindness and empathy",
+        "💭 Consider how your words might affect others",
+        "🌱 Use 'I feel' statements instead of 'You are' statements",
+        "🔄 Replace negative words with constructive alternatives",
+        "❤️ Focus on the issue, not personal attacks"
+    ]
+    return "\n".join(suggestions)
+
+def clear_text():
+    text_entry.delete("1.0", tk.END)
+    result_frame.pack_forget()
+    char_label.config(text="Characters: 0/5000", fg="#7f8c8d")
+    text_entry.config(fg="#bdc3c7")
+    text_entry.focus()
+
+def on_text_change(event):
+    char_count = len(text_entry.get("1.0", tk.END).strip())
+    char_label.config(text=f"Characters: {char_count}/5000")
+    
+    # Color coding for character count
+    if char_count > 4500:
+        char_label.config(fg="#e74c3c")  # Red
+    elif char_count > 3000:
+        char_label.config(fg="#f39c12")  # Orange
+    else:
+        char_label.config(fg="#7f8c8d")  # Gray
+
+def update_placeholder(force=False):
+    content = text_entry.get("1.0", tk.END).strip()
+    if force or not content:
+        text_entry.config(fg="#bdc3c7")
+        if text_entry.get("1.0", tk.END).strip() == "":
+            text_entry.insert("1.0", PLACEHOLDER_TEXT)
+    else:
+        if content == PLACEHOLDER_TEXT:
+            text_entry.delete("1.0", tk.END)
+        text_entry.config(fg="#2c3e50")
+
+def on_text_focus_in(event):
+    if text_entry.get("1.0", tk.END).strip() == PLACEHOLDER_TEXT:
+        text_entry.delete("1.0", tk.END)
+        text_entry.config(fg="#2c3e50")
+
+def on_text_focus_out(event):
+    if not text_entry.get("1.0", tk.END).strip():
+        update_placeholder(force=True)
+
+def show_model_details():
+    details = f"""🔬 Advanced AI Model Details
+
+🎯 Ensemble Model Performance: {best_accuracy * 100:.2f}%
+
+🤖 Individual Model Accuracies:
+"""
+    for name, acc in individual_accuracies.items():
+        details += f"   • {name}: {acc * 100:.2f}%\n"
+    
+    details += f"""
+📊 Cross-Validation Score: {cv_scores.mean() * 100:.2f}% (±{cv_scores.std() * 2 * 100:.2f}%)
+
+🧠 Advanced Features:
+   • TF-IDF Vectorization (8,000+ features)
+   • N-gram Analysis (1-3 word patterns)
+   • Sentiment Analysis Integration
+   • Text Structure Analysis
+   • Punctuation Pattern Recognition
+   • Offensive Language Detection
+
+⚙️ Model Architecture:
+   Ensemble of 4 Machine Learning Models:
+   • Support Vector Machine (SVM)
+   • Logistic Regression
+   • Random Forest
+   • Naive Bayes
+   
+🔧 Technical Notes:
+   Features are normalized for optimal performance
+   Hard voting consensus for final predictions
+   Cross-validated for reliability
+"""
+    
+    messagebox.showinfo("🔬 Model Technical Details", details)
+
+def show_tips():
+    tips = """💡 Tips for Better Communication Online:
+
+🌟 Positive Communication:
+   • Use "I" statements instead of "You" accusations
+   • Express disagreement respectfully
+   • Focus on ideas, not personal attacks
+   • Ask questions to understand better
+
+🚫 Avoid These Patterns:
+   • Name-calling and insults
+   • Threats or aggressive language
+   • Discriminatory comments
+   • Excessive caps (SHOUTING)
+
+🛡️ Creating Safe Spaces:
+   • Encourage others' contributions
+   • Use constructive feedback
+   • Be mindful of cultural differences
+   • Think before you post
+
+🔄 Before Posting, Ask:
+   • Would I say this face-to-face?
+   • Could this hurt someone's feelings?
+   • Is this constructive or destructive?
+   • Am I being respectful?
+"""
+    
+    messagebox.showinfo("💡 Communication Tips", tips)
+
