@@ -735,3 +735,280 @@ details_button = tk.Button(
     activebackground="#8b5cf6"
 )
 details_button.pack(side="left")
+
+# Result Section (initially hidden)
+result_frame = tk.Frame(card_frame, relief="flat", bg="#ffffff", pady=20)
+
+# Icon for result
+icon_label = tk.Label(
+    result_frame, 
+    text="", 
+    font=("Segoe UI", 48), 
+    bg="#ffffff"
+)
+icon_label.pack(pady=(10, 5))
+
+# Result text
+result_label = tk.Label(
+    result_frame, 
+    text="", 
+    font=("Segoe UI", 20, "bold"), 
+    bg="#ffffff"
+)
+result_label.pack(pady=5)
+
+# Confidence score
+confidence_label = tk.Label(
+    result_frame, 
+    text="", 
+    font=("Segoe UI", 12, "bold"), 
+    bg="#ffffff"
+)
+confidence_label.pack(pady=5)
+
+# Advice text
+advice_label = tk.Label(
+    result_frame, 
+    text="", 
+    font=("Segoe UI", 12), 
+    bg="#ffffff",
+    fg="#4a5568",
+    wraplength=700
+)
+advice_label.pack(pady=(5, 15))
+
+# Analysis details
+analysis_label = tk.Label(
+    result_frame, 
+    text="", 
+    font=("Segoe UI", 10), 
+    bg="#ffffff",
+    fg="#718096"
+)
+analysis_label.pack(pady=(0, 15))
+
+# Suggestions section
+suggestions_frame = tk.Frame(result_frame, bg="#ffffff")
+suggestions_frame.pack(fill="x", padx=20, pady=10)
+
+suggestions_label = tk.Label(
+    suggestions_frame,
+    text="💭 Smart Suggestions:",
+    font=("Segoe UI", 12, "bold"),
+    bg="#ffffff",
+    fg="#2d3748"
+)
+suggestions_label.pack(anchor="w", pady=(0, 5))
+
+suggestions_text = tk.Text(
+    suggestions_frame,
+    height=4,
+    font=("Segoe UI", 10),
+    bg="#f7fafc",
+    fg="#4a5568",
+    relief="flat",
+    bd=1,
+    padx=10,
+    pady=8,
+    wrap=tk.WORD,
+    state='disabled'
+)
+suggestions_scrollbar = tk.Scrollbar(suggestions_frame, orient="vertical", command=suggestions_text.yview, bg="#e2e8f0", troughcolor="#f7fafc")
+suggestions_scrollbar.pack(side="right", fill="y")
+suggestions_text.config(yscrollcommand=suggestions_scrollbar.set)
+suggestions_text.pack(side="left", fill="both", expand=True)
+
+
+# Modern Footer
+footer_frame = tk.Frame(content_frame, bg="#2d3748", height=120)
+footer_frame.pack(fill="x", side="bottom")
+footer_frame.pack_propagate(False)
+
+# Footer content container with padding
+footer_content = tk.Frame(footer_frame, bg="#2d3748")
+footer_content.pack(expand=True, fill="both", padx=30, pady=20)
+
+# Top section of footer with main info
+footer_top = tk.Frame(footer_content, bg="#2d3748")
+footer_top.pack(fill="x", pady=(0, 10))
+
+# Left side - App info with icon
+app_info_frame = tk.Frame(footer_top, bg="#2d3748")
+app_info_frame.pack(side="left")
+
+app_name_label = tk.Label(
+    app_info_frame,
+    text="🛡️ AI Cyberbullying Guardian",
+    font=("Segoe UI", 14, "bold"),
+    bg="#2d3748",
+    fg="#e2e8f0"
+)
+app_name_label.pack(anchor="w")
+
+version_label = tk.Label(
+    app_info_frame,
+    text="v2.0 • Advanced AI Protection System",
+    font=("Segoe UI", 9),
+    bg="#2d3748",
+    fg="#a0aec0"
+)
+version_label.pack(anchor="w", pady=(2, 0))
+
+# Right side - Performance stats
+stats_frame = tk.Frame(footer_top, bg="#2d3748")
+stats_frame.pack(side="right")
+
+accuracy_label = tk.Label(
+    stats_frame,
+    text=f"🎯 Model Accuracy: {best_accuracy * 100:.1f}%",
+    font=("Segoe UI", 11, "bold"),
+    bg="#2d3748",
+    fg="#48bb78"
+)
+accuracy_label.pack(anchor="e")
+
+features_label = tk.Label(
+    stats_frame,
+    text="🧠 8,000+ Features • 4 AI Models • Real-time Analysis",
+    font=("Segoe UI", 9),
+    bg="#2d3748",
+    fg="#a0aec0"
+)
+features_label.pack(anchor="e", pady=(2, 0))
+
+# Separator line with gradient effect
+separator = tk.Frame(footer_content, height=1, bg="#4a5568")
+separator.pack(fill="x", pady=(5, 10))
+
+# Bottom section of footer
+footer_bottom = tk.Frame(footer_content, bg="#2d3748")
+footer_bottom.pack(fill="x")
+
+# Left side - Copyright and attribution
+copyright_frame = tk.Frame(footer_bottom, bg="#2d3748")
+copyright_frame.pack(side="left")
+
+copyright_label = tk.Label(
+    copyright_frame,
+    text="© 2025 AI Guardian • Built with Python & Scikit-learn",
+    font=("Segoe UI", 9),
+    bg="#2d3748",
+    fg="#718096"
+)
+copyright_label.pack(anchor="w")
+
+# Center - Mission statement
+mission_frame = tk.Frame(footer_bottom, bg="#2d3748")
+mission_frame.pack(side="left", expand=True)
+
+mission_label = tk.Label(
+    mission_frame,
+    text="🌟 Creating safer digital spaces through AI • Promoting positive communication",
+    font=("Segoe UI", 9, "italic"),
+    bg="#2d3748",
+    fg="#9ca3af"
+)
+mission_label.pack()
+
+# Right side - Technical badges
+badges_frame = tk.Frame(footer_bottom, bg="#2d3748")
+badges_frame.pack(side="right")
+
+# Create modern badges
+tech_badge = tk.Label(
+    badges_frame,
+    text="⚡ ML",
+    font=("Segoe UI", 8, "bold"),
+    bg="#667eea",
+    fg="white",
+    padx=6,
+    pady=2
+)
+tech_badge.pack(side="right", padx=(5, 0))
+
+ai_badge = tk.Label(
+    badges_frame,
+    text="🤖 AI",
+    font=("Segoe UI", 8, "bold"),
+    bg="#48bb78",
+    fg="white",
+    padx=6,
+    pady=2
+)
+ai_badge.pack(side="right", padx=(5, 0))
+
+security_badge = tk.Label(
+    badges_frame,
+    text="🛡️ SAFE",
+    font=("Segoe UI", 8, "bold"),
+    bg="#ed8936",
+    fg="white",
+    padx=6,
+    pady=2
+)
+security_badge.pack(side="right", padx=(5, 0))
+
+# Add subtle hover effects for interactive elements
+def on_badge_enter(event, badge, color):
+    badge.config(bg=color)
+
+def on_badge_leave(event, badge, original_color):
+    badge.config(bg=original_color)
+
+# Bind hover effects
+tech_badge.bind("<Enter>", lambda e: on_badge_enter(e, tech_badge, "#5a6fd8"))
+tech_badge.bind("<Leave>", lambda e: on_badge_leave(e, tech_badge, "#667eea"))
+
+ai_badge.bind("<Enter>", lambda e: on_badge_enter(e, ai_badge, "#38a169"))
+ai_badge.bind("<Leave>", lambda e: on_badge_leave(e, ai_badge, "#48bb78"))
+
+security_badge.bind("<Enter>", lambda e: on_badge_enter(e, security_badge, "#dd6b20"))
+security_badge.bind("<Leave>", lambda e: on_badge_leave(e, security_badge, "#ed8936"))
+
+# Add a subtle glow effect to the footer
+def create_footer_glow():
+    """Create a subtle animated glow effect for the footer"""
+    colors = ["#2d3748", "#374151", "#2d3748"]
+    current_color = 0
+    
+    def animate_glow():
+        nonlocal current_color
+        footer_frame.config(bg=colors[current_color])
+        footer_content.config(bg=colors[current_color])
+        footer_top.config(bg=colors[current_color])
+        footer_bottom.config(bg=colors[current_color])
+        app_info_frame.config(bg=colors[current_color])
+        stats_frame.config(bg=colors[current_color])
+        copyright_frame.config(bg=colors[current_color])
+        mission_frame.config(bg=colors[current_color])
+        badges_frame.config(bg=colors[current_color])
+        
+        # Update label backgrounds
+        for widget in [app_name_label, version_label, accuracy_label, features_label, 
+                      copyright_label, mission_label]:
+            widget.config(bg=colors[current_color])
+        
+        current_color = (current_color + 1) % len(colors)
+        root.after(3000, animate_glow)  # Change every 3 seconds
+    
+    # Start the glow animation
+    root.after(1000, animate_glow)
+
+# Initialize the glow effect
+create_footer_glow()
+
+# Final setup - ensure footer stays at bottom
+root.grid_rowconfigure(0, weight=1)
+
+# Start the main GUI loop
+if __name__ == "__main__":
+    print("\n🚀 Starting AI Cyberbullying Guardian...")
+    print("🎯 GUI loaded successfully!")
+    print(f"📊 Model ready with {best_accuracy * 100:.1f}% accuracy")
+    print("💡 Ready to analyze text for cyberbullying detection!\n")
+    
+    # Focus on text entry for immediate use
+    text_entry.focus_set()
+    
+    # Start the application
+    root.mainloop()
