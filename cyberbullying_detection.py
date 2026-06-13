@@ -505,3 +505,233 @@ def show_tips():
     
     messagebox.showinfo("💡 Communication Tips", tips)
 
+# ---------------------- Enhanced GUI Layout ----------------------
+
+root = tk.Tk()
+root.title("🛡️ AI Cyberbullying Guardian")
+root.geometry("900x900")
+root.configure(bg="#f8fafc")
+root.resizable(True, True)
+
+# Scrollable page container so the full interface fits on smaller screens
+page_container = tk.Frame(root, bg="#f8fafc")
+page_container.pack(fill="both", expand=True)
+
+page_canvas = tk.Canvas(page_container, bg="#f8fafc", highlightthickness=0, bd=0)
+page_canvas.pack(side="left", fill="both", expand=True)
+
+page_scrollbar = tk.Scrollbar(page_container, orient="vertical", command=page_canvas.yview)
+page_scrollbar.pack(side="right", fill="y")
+
+page_canvas.configure(yscrollcommand=page_scrollbar.set)
+
+content_frame = tk.Frame(page_canvas, bg="#f8fafc")
+content_window = page_canvas.create_window((0, 0), window=content_frame, anchor="nw")
+
+def update_page_scrollregion(event):
+    page_canvas.configure(scrollregion=page_canvas.bbox("all"))
+
+def sync_page_width(event):
+    page_canvas.itemconfigure(content_window, width=event.width)
+
+def on_mousewheel(event):
+    page_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+content_frame.bind("<Configure>", update_page_scrollregion)
+page_canvas.bind("<Configure>", sync_page_width)
+root.bind_all("<MouseWheel>", on_mousewheel)
+
+# Global variables
+analyzing = False
+
+# Configure style
+style = ttk.Style()
+style.theme_use('clam')
+
+# Create gradient effect frame
+header_frame = tk.Frame(content_frame, bg="#764ba2", height=150)
+header_frame.pack(fill="x", padx=0, pady=0)
+header_frame.pack_propagate(False)
+
+# Create gradient-like effect with multiple frames
+gradient_colors = ["#764ba2", "#764ba2"]
+for i, color in enumerate(gradient_colors):
+    grad_frame = tk.Frame(header_frame, bg=color, height=70)
+    grad_frame.place(x=0, y=i*50, relwidth=1)
+
+# Title with modern styling
+title_label = tk.Label(
+    header_frame, 
+    text="🛡️ AI Cyberbullying Guardian", 
+    font=("Segoe UI", 24, "bold"), 
+    bg="#764ba2", 
+    fg="white"
+)
+title_label.pack(pady=15)
+
+# Subtitle with glow effect
+subtitle_label = tk.Label(
+    header_frame, 
+    text="Advanced AI Protection • Real-time Analysis • Smart Suggestions", 
+    font=("Segoe UI", 12), 
+    bg="#764ba2", 
+    fg="#e8f1ff"
+)
+subtitle_label.pack()
+
+# Main Content Frame with modern card design
+main_frame = tk.Frame(content_frame, bg="#f8fafc")
+main_frame.pack(fill="both", expand=True, padx=30, pady=30)
+
+# Create card-like container
+card_frame = tk.Frame(main_frame, bg="white", relief="flat", bd=0)
+card_frame.pack(fill="both", expand=True, padx=0, pady=0)
+
+# Add subtle shadow effect
+shadow_frame = tk.Frame(main_frame, bg="#e2e8f0", height=4)
+shadow_frame.place(x=5, y=5, relwidth=1, relheight=1)
+card_frame.lift()
+
+# Input Section with modern design
+input_section = tk.Frame(card_frame, bg="white", pady=20)
+input_section.pack(fill="x", padx=30)
+
+input_label = tk.Label(
+    input_section, 
+    text="✍️ Enter your message for analysis:", 
+    font=("Segoe UI", 16, "bold"), 
+    bg="white", 
+    fg="#2d3748"
+)
+input_label.pack(anchor="w", pady=(0, 10))
+
+# Text Entry with modern styling
+text_frame = tk.Frame(input_section, bg="white")
+text_frame.pack(fill="x", pady=(0, 10))
+
+text_entry = tk.Text(
+    text_frame, 
+    height=8, 
+    width=70, 
+    font=("Segoe UI", 12),
+    wrap=tk.WORD,
+    relief="solid",
+    borderwidth=2,
+    bd=0,
+    padx=15,
+    pady=15,
+    bg="#f7fafc",
+    fg="#2c3e50",
+    insertbackground="#667eea",
+    selectbackground="#667eea",
+    selectforeground="white"
+)
+text_entry.pack(side="left", fill="both", expand=True)
+
+# Modern scrollbar
+scrollbar = tk.Scrollbar(text_frame, orient="vertical", command=text_entry.yview, bg="#e2e8f0", troughcolor="#f7fafc")
+scrollbar.pack(side="right", fill="y")
+text_entry.config(yscrollcommand=scrollbar.set)
+
+# Character counter with status
+char_frame = tk.Frame(input_section, bg="white")
+char_frame.pack(fill="x", pady=(5, 0))
+
+char_label = tk.Label(
+    char_frame, 
+    text="Characters: 0/5000", 
+    font=("Segoe UI", 10), 
+    bg="white", 
+    fg="#718096"
+)
+char_label.pack(side="left")
+
+# Status indicator
+status_label = tk.Label(
+    char_frame, 
+    text="Ready to analyze", 
+    font=("Segoe UI", 10), 
+    bg="white", 
+    fg="#48bb78"
+)
+status_label.pack(side="right")
+
+# Bind events
+text_entry.bind('<KeyRelease>', on_text_change)
+text_entry.bind('<FocusIn>', on_text_focus_in)
+text_entry.bind('<FocusOut>', on_text_focus_out)
+
+# Initialize placeholder
+update_placeholder(force=True)
+
+# Modern Button Section
+button_section = tk.Frame(card_frame, bg="white", pady=20)
+button_section.pack(fill="x", padx=30)
+
+button_container = tk.Frame(button_section, bg="white")
+button_container.pack()
+
+# Analyze Button with gradient-like effect
+check_button = tk.Button(
+    button_container,
+    text="🔍 Analyze Message",
+    font=("Segoe UI", 14, "bold"),
+    bg="#667eea",
+    fg="white",
+    relief="flat",
+    padx=40,
+    pady=15,
+    cursor="hand2",
+    command=detect_cyberbullying,
+    activebackground="#5a6fd8",
+    activeforeground="white"
+)
+check_button.pack(side="left", padx=(0, 15))
+
+# Clear Button
+clear_button = tk.Button(
+    button_container,
+    text="🗑️ Clear Text",
+    font=("Segoe UI", 12),
+    bg="#e2e8f0",
+    fg="#4a5568",
+    relief="flat",
+    padx=25,
+    pady=15,
+    cursor="hand2",
+    command=clear_text,
+    activebackground="#cbd5e0"
+)
+clear_button.pack(side="left", padx=(0, 15))
+
+# Tips Button
+tips_button = tk.Button(
+    button_container,
+    text="💡 Communication Tips",
+    font=("Segoe UI", 12),
+    bg="#48bb78",
+    fg="white",
+    relief="flat",
+    padx=25,
+    pady=15,
+    cursor="hand2",
+    command=show_tips,
+    activebackground="#38a169"
+)
+tips_button.pack(side="left", padx=(0, 15))
+
+# Model Details Button
+details_button = tk.Button(
+    button_container,
+    text="📊 Technical Details",
+    font=("Segoe UI", 12),
+    bg="#9f7aea",
+    fg="white",
+    relief="flat",
+    padx=25,
+    pady=15,
+    cursor="hand2",
+    command=show_model_details,
+    activebackground="#8b5cf6"
+)
+details_button.pack(side="left")
