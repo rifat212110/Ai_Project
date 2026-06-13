@@ -145,3 +145,46 @@ df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
 print(f"Dataset size after balancing: {len(df_balanced)}")
 print(f"Cyberbullying samples: {sum(df_balanced['binary_label'])}")
 print(f"Non-cyberbullying samples: {len(df_balanced) - sum(df_balanced['binary_label'])}")
+
+
+# ---------------------- Enhanced Feature Engineering ----------------------
+
+# TF-IDF with optimized parameters
+tfidf_vectorizer = TfidfVectorizer(
+    max_features=8000,
+    ngram_range=(1, 3),  # Include bigrams and trigrams
+    min_df=2,
+    max_df=0.95,
+    sublinear_tf=True,
+    strip_accents='unicode'
+)
+
+# Fit TF-IDF on cleaned text
+X_text = tfidf_vectorizer.fit_transform(df_balanced['cleaned_text'])
+
+# Additional numerical features
+feature_columns = ['length', 'word_count', 'char_count', 'avg_word_length', 
+                  'exclamation_count', 'question_count', 'caps_ratio',
+                  'sentiment_pos', 'sentiment_neg', 'sentiment_neu', 
+                  'sentiment_compound', 'offensive_word_count']
+
+X_features = df_balanced[feature_columns].fillna(0)
+
+# Scale features to [0,1] range for MultinomialNB compatibility
+scaler = MinMaxScaler()
+X_features_scaled = scaler.fit_transform(X_features)
+
+# Combine TF-IDF and scaled additional features
+from scipy.sparse import hstack, csr_matrix
+X_features_sparse = csr_matrix(X_features_scaled)
+X_combined = hstack([X_text, X_features_sparse])
+
+y = df_balanced['binary_label']
+
+# Split with stratification
+X_train, X_test, y_train, y_test = train_test_split(
+    X_combined, y, test_size=0.2, random_state=42, stratify=y
+)
+
+print(f"Training set size: {X_train.shape[0]}")
+print(f"Test set size: {X_test.shape[0]}")
